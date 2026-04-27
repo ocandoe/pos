@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from odoo import models, fields
+
+
+class Company(models.Model):
+    _inherit = "res.company"
+
+    close_session_restrition = fields.Boolean('Close Session Restriction')
+    qr_ticket = fields.Boolean('Allow show qr in ticket pos')

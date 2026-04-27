@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="l10n_gt_pos.OrderReceipt" t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <xpath expr="//ReceiptHeader[@data='props.data.headerData']" position="replace">
+            <div style="text-align: center;" >
+                <t t-if= "props.data.invoice">
+                    <t t-esc="props.data.invoice.company_name"/>
+                    <br/>
+                    <t t-esc="props.data.invoice.commercial_name"/>
+                    <br/>
+                    <t t-esc="props.data.invoice.commercial_address"/>
+                    <br/>
+                </t>
+                <t t-esc="props.data.headerData.company.phone"/>
+                <br/>
+                <t t-if= "props.data.invoice">
+                    <span>NIT: <t t-esc="props.data.invoice.vat"/></span>
+                    <br/>
+                </t>
+                <t t-esc="props.data.headerData.company.email"/>
+            </div>
+            <t t-if="props.data.invoice and props.data.invoice.fel_uuid">
+                <div style="text-align: center;">
+                    <span>DOCUMENTO TRIBUTARIO ELECTRONICO</span>
+                    <br/>
+                    <t t-if="props.data.invoice and props.data.invoice.move_type == 'out_invoice'">
+                        <t t-if="props.data.invoice.fel_dte_type =='FACT'">
+                            <span>FACTURA</span>
+                        </t>
+                        <t t-elif="props.data.invoice.fel_dte_type =='FCAM'">
+                            <span>FACTURA CAMBIARIA</span>
+                        </t>
+                        <t t-elif="props.data.invoice.fel_dte_type == 'FPEQ'">
+                            <span>FACTURA PEQUEÑO CONTRIBUYENTE</span>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <span>NOTA DE CREDITO</span>
+                    </t>
+                </div>
+            </t>
+            <t t-else ="">
+                <div style="text-align: center;">
+                    <span>RECIBO</span>
+                </div>
+            </t>
+            <t t-if="props.data.invoice and props.data.invoice.fel_uuid">
+                <div style="text-align: left;">
+                    <b>Serie: </b>
+                    <t t-esc='props.data.invoice.fel_serie'/>
+                    <b> Numero: </b>
+                    <t t-esc="props.data.invoice.fel_number"/>
+                    <br/>
+                    <b>Numero de Autorizacion: </b>
+                    <t t-esc="props.data.invoice.fel_uuid"/>
+                    <br/>
+                    <t t-if = "props.data.invoice.fel_certification_date">
+                        <b>Fecha de Certificacion: </b>
+                        <t t-esc="props.data.invoice.fel_certification_date"/>
+                    </t>
+                </div>
+            </t>
+            <div>
+                <b>Fecha Emision: </b>
+                <t t-esc="props.data.date" />
+                <br/>
+                <b><t t-esc="props.data.name" /></b>
+                <t t-if= "props.data.invoice and props.data.invoice.commercial_partner_id_name">
+                    <div>
+                        <b>Cliente: </b>
+                        <t t-esc="props.data.invoice.commercial_partner_id_name"/>
+                    </div>
+                    <t t-if= "props.data.client.street">
+                        <div>
+                            <b>Direccion: </b>
+                            <t t-esc="props.data.invoice.commercial_partner_id_street"/>
+                        </div>
+                    </t>
+                    <t t-else = "">
+                        <div><b>Direccion: </b>CIUDAD </div>
+                    </t>
+                    <t t-if="props.data.invoice.commercial_partner_id_vat">
+                        <div>
+                            <b>NIT: </b>
+                            <t t-esc="props.data.invoice.commercial_partner_id_vat"/>
+                        </div>
+                    </t>
+                    <t t-elif="props.data.invoice.commercial_partner_id_cui">
+                        <div>
+                            <b>CUI: </b>
+                            <t t-esc="props.data.invoice.commercial_partner_id_cui"/>
+                        </div>
+                    </t>
+                    <t t-else = "">
+                        <div><b>NIT: </b>CF</div>
+                    </t>
+                </t>
+                <t t-else="">
+                    <t t-if= "props.data.client">
+                        <div>
+                            <b>Cliente: </b>
+                            <t t-esc="props.data.client.name"/>
+                        </div>
+                        <t t-if= "props.data.client.street">
+                            <div>
+                                <b>Direccion: </b>
+                                <t t-esc="props.data.client.street"/>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+            </div>
+
+
+        </xpath>
+        <xpath expr="//OrderWidget[@lines='props.data.orderlines']" position="replace">
+            <div >
+                <table style="width: 100%; text-align: left;">
+                    <thead>
+                        <tr style="background-color: #f4f4f4; ">
+                            <th style="padding: 8px;">Descripcion</th>
+                            <th style="padding: 8px;">Cant.</th>
+                            <th style="padding: 8px;">Precio U.</th>
+                            <th style="padding: 8px;">Uni.</th>
+                            <th style="padding: 8px;">Total</th>
+                        </tr>
+                    </thead>
+                </table>
+                <OrderWidget lines="props.data.orderlines" t-slot-scope="scope">
+                    <t t-set="line" t-value="scope.line"/>
+                    <Orderline line="omit(scope.line, 'customerNote')">
+                        <li t-if="line.customerNote" class="customer-note w-100 p-2 my-1 rounded text-break">
+                            <i class="fa fa-sticky-note me-1" role="img" aria-label="Customer Note" title="Customer Note"/>
+                            <t t-esc="line.customerNote" />
+                        </li>
+                        <ul t-if="line.pack_lot_lines">
+                            <li t-foreach="line.pack_lot_lines" t-as="lot" t-key="lot.cid">
+                                <t t-if="lot.order_line.product.tracking == 'lot'">
+                                    Lot Number <t t-esc="lot.lot_name"/>
+                                </t>
+                                <t t-else="">
+                                    SN <t t-esc="lot.lot_name"/>
+                                </t>
+                            </li>
+                        </ul>
+                    </Orderline>
+                </OrderWidget>
+
+
+            </div>
+
+        </xpath>
+        <xpath expr="//t[@t-if='!props.basic_receipt']" position="replace">
+            <div class="pos-receipt-right-align">--------</div>
+            <br/>
+            <div class="pos-receipt-amount">
+                    <t t-foreach="props.data.tax_details" t-as="tax" t-key="tax.tax.id">
+                        <t t-if="tax.amount == 0">
+                            <span>Exento: </span>
+                            <span t-esc="props.formatCurrency(tax.base, false)" class="pos-receipt-right-align"/>
+                            <br/>
+                        </t>
+                        <t t-else="">
+                            <span>Afecto: </span>
+                            <t t-if="(tax.amount + tax.base) > 0">
+                                <span t-esc="props.formatCurrency(tax.amount + tax.base, false)" class="pos-receipt-right-align" />
+                            </t>
+                            <t t-else="">
+                                <span t-esc="props.formatCurrency(-1*(tax.amount + tax.base), false)" class="pos-receipt-right-align" />
+                            </t>
+                            <br/>
+                        </t>
+                    </t>
+                <span>TOTAL</span>
+                <t t-if="props.data.amount_total > 0">
+                        <span t-esc="props.formatCurrency(props.data.amount_total)" class="pos-receipt-right-align"/>
+                    </t>
+                <t t-else="">
+                        <span t-esc="props.formatCurrency(-1*props.data.amount_total)" class="pos-receipt-right-align"/>
+                    </t>
+
+                </div>
+            <div class="paymentlines" t-foreach="props.data.paymentlines" t-as="line" t-key="line_index">
+                    <t t-esc="line.name" />
+                <t t-if="line.amount > 0">
+                        <span t-esc="props.formatCurrency(line.amount, false)" class="pos-receipt-right-align"/>
+                    </t>
+                <t t-else="">
+                        <span t-esc="props.formatCurrency(-1*line.amount, false)" class="pos-receipt-right-align"/>
+                    </t>
+
+                </div>
+
+            <div class="pos-receipt-amount receipt-change mt-2">
+                    <span>CHANGE</span>
+                <span t-esc="props.formatCurrency(props.data.change)" class="pos-receipt-right-align"/>
+                </div>
+            <t t-if="props.data.total_discount">
+                    <div>
+                        Discounts
+                        <span t-esc="props.formatCurrency(props.data.total_discount)" class="pos-receipt-right-align"/>
+                    </div>
+                </t>
+            <div style="text-align: center;" t-if="props.data.invoice and props.data.invoice.fel_uuid">
+                    <t t-if='props.data.invoice.scenary_isr != "Unknown"'>
+                        <t t-esc="props.data.invoice.scenary_isr"/>
+                    </t>
+                <br/>
+                <t t-if='props.data.invoice.scenary_iva != "Unknown"'>
+                        <t t-esc="props.data.invoice.scenary_iva"/>
+                    </t>
+                <b>Certificador </b>
+                <br/>
+                <t t-esc="props.data.invoice.cert_name"/>
+                <span> NIT:</span>
+                <t t-esc="props.data.invoice.cert_vat"/>
+                <br/>
+                <t t-if="props.data.invoice.qr_image">
+                        <img id="posqrcode" t-att-src="props.data.pos_qr_code" class="pos-receipt-qrcode" width="75" height="75"/>
+                    </t>
+                </div>
+            <div style="text-align: left;" t-if="props.data.invoice and props.data.invoice.reversed_fel_serie">
+                    <b>Factura Asociada</b>
+                <br/>
+                <b>Fecha Emision: </b>
+                <t t-esc="props.data.invoice.reversed_fel_date"/>
+                <br/>
+                <b>Serie: </b>
+                <t t-esc='props.data.invoice.reversed_fel_serie'/>
+                <b> Numero: </b>
+                <t t-esc="props.data.invoice.reversed_fel_number"/>
+                <br/>
+                <b>Motivo: </b><span>NOTA DE CREDITO</span>
+                <br/>
+                <b>Numero de Autorizacion: </b>
+                <t t-esc="props.data.invoice.reversed_fel_uuid"/>
+                </div>
+
+        </xpath>
+        <xpath expr="//div[@t-if='props.data.footer']" position="replace"/>
+
+        <xpath expr="//div[@class='after-footer']" position="replace"/>
+
+        <xpath expr="//p" position="replace"/>
+        <xpath expr="//div[@t-esc='props.data.name']" position="replace"/>
+        <xpath expr="//div[@id='order-date']" position="replace"/>
+    </t>
+</templates>

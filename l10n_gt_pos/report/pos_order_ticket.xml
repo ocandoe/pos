@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_pos_order_ticket">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="article">
+                    <div class="page">
+                        <div>
+                            <p align="center">
+                            
+                                <t t-if="o.company_id">
+                                    <span t-field="o.company_id.name" />
+                                    <br />
+                                    <span>NIT:</span>
+                                    <span t-field="o.company_id.parent_id.vat" />
+                                    <br />
+                                    <span t-field="o.company_id.establishment_name" />
+                                    <br />
+                                    <span t-field="o.company_id.street" />
+                                    <br />
+                                    <t t-if="o.company_id.phone">
+                                        <span t-field="o.company_id.phone" />
+                                    </t>
+                                    <br />
+                                    <t t-if="o.company_id.email">
+                                        <span t-field="o.company_id.email" />
+                                    </t>
+                                    <br />
+                                </t>
+
+                                <t t-else="">
+                                    <span t-field="o.company_id.parent_id.name" />
+                                    <br />
+                                    <span>NIT:</span>
+                                    <span t-field="o.company_id.parent_id.vat" />
+                                    <br />
+                                    <span t-field="o.company_id.parent_id.establishment_name" />
+                                    <br />
+                                    <span t-field="o.company_id.parent_id.street" />
+                                    <br />
+                                    <t t-if="o.company_id.parent_id.phone">
+                                        <span t-field="o.company_id.parent_id.phone" />
+                                    </t>
+                                    <br />
+                                    <t t-if="o.company_id.parent_id.email">
+                                        <span t-field="o.company_id.parent_id.email" />
+                                    </t>
+                                    <br />
+
+                                </t>
+
+                            </p>
+                        </div>
+                        <div>
+                            <t t-if="o.account_move.fel_uuid">
+                                <div style="text-align: center;">
+                                    <span>DOCUMENTO TRIBUTARIO ELECTRONICO</span>
+                                    <br />
+                                    <t t-if="o.account_move.move_type == 'out_invoice'">
+                                        <t t-if="o.account_move.journal_id.fel_dte_type =='FACT'">
+                                            <span>FACTURA</span>
+                                        </t>
+                                        <t t-elif="o.account_move.journal_id.fel_dte_type =='FCAM'">
+                                            <span>FACTURA CAMBIARIA</span>
+                                        </t>
+                                        <t t-elif="o.account_move.journal_id.fel_dte_type == 'FPEQ'">
+                                            <span>FACTURA PEQUEÑO CONTRIBUYENTE </span>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <span>NOTA DE CREDITO</span>
+                                    </t>
+                                </div>
+                                <div style="text-align: center;">
+                                    <b>Serie:</b>
+                                    <t t-esc='o.account_move.fel_serie' />
+                                    <span>, </span>
+                                    <b>No.</b>
+                                    <t t-esc="o.account_move.fel_number" />
+                                </div>
+                                <div>
+                                    <t t-if="o.account_move.reversed_entry_id.fel_number">
+                                        <div style="text-align: center;">
+                                            <b>Factura Asociada:</b>
+                                            <br />
+                                            <b>Serie:</b>
+                                            <t t-esc='o.account_move.reversed_entry_id.fel_serie' />
+                                            <span>, </span>
+                                            <b>No.</b>
+                                            <t t-esc="o.account_move.reversed_entry_id.fel_number" />
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div style="text-align: center;">
+                                    <span>RECIBO</span>
+                                </div>
+                            </t>
+                        </div>
+                        <br />
+                        <div style="text-align: left;">
+
+                            <div>Fecha Emision:<t t-esc="o.date_order" />
+                            </div>
+
+                            <div>
+                                <t t-esc="o.pos_reference" />
+                            </div>
+                            <t t-if="o.cashier">
+                                <div class="cashier">
+                                    <div>Atendido por: <t t-esc="o.cashier" />
+                                    </div>
+                                </div>
+                            </t>
+                            <div>Cliente: <t t-esc="o.partner_id.commercial_partner_id.name" />
+                            </div>
+                            <t t-if="o.partner_id['street']">
+                                <div>Direccion: <t t-esc="o.partner_id['street']" />
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div>Direccion: CIUDAD </div>
+                            </t>
+                            <t t-if="o.partner_id['vat']">
+                                <div>NIT: <t t-esc="o.partner_id['vat']" />
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div>NIT: CF </div>
+                            </t>
+                        </div>
+                        <br />
+                        <!-- Productos-->
+                        <table width="95%">
+                            <colgroup>
+                                <col width="15%" />
+                                <col width="60%" />
+                                <col width="20%" />
+                            </colgroup>
+                            <tr>
+                                <th class="text-center" style="border-color: transparent;">Cant.</th>
+                                <th class="text-center" style="border-color: transparent;">Descripcion</th>
+                                <th class="text-center" style="border-color: transparent;">Precio</th>
+                            </tr>
+                            <tr t-foreach="o.lines" t-as="l" style="border-color: transparent;">
+                                <td class="text-left">
+                                    <t t-esc="l.qty" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}" />
+                                </td>
+                                <td>
+                                    <t t-if="not product_tax">
+                                        <t t-set="product_tax" t-value="l.price_subtotal == l.price_subtotal_incl" t-keep="product_tax" />
+                                    </t>
+                                    <t t-if="l.price_subtotal == l.price_subtotal_incl">
+                                        <span>*</span>
+                                        <t t-esc="l.product_id.name" />
+                                        <t t-foreach="l.pack_lot_ids" t-as="lot">
+                                            <span t-esc="lot.lot_name" />
+                                            <br />
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-esc="l.product_id.name" />
+                                        <t t-foreach="l.pack_lot_ids" t-as="lot">
+                                            <span t-esc="lot.lot_name" />
+                                            <br />
+                                        </t>
+                                    </t>
+                                </td>
+                                <td class="text-center">
+                                    <t t-esc="l.price_unit * l.qty" t-options="{'widget': 'monetary', 'display_currency': user.company_id.currency_id}" />
+                                </td>
+                            </tr>
+                        </table>
+                        <br />
+                        <!--Totales-->
+                        <t t-set="total_exento" t-value="0" />
+                        <t t-set="total_afecto" t-value="0" />
+                        <t t-foreach="o.lines" t-as="l">
+                            <t t-if="o.account_move.journal_id.fel_dte_type != 'FPEQ'">
+                                <t t-if="l.price_subtotal == l.price_subtotal_incl">
+                                    <t t-set="total_exento" t-value="total_exento + l.price_subtotal" />
+                                </t>
+                                <t t-else="">
+                                    <t t-set="total_afecto" t-value="total_afecto + l.price_subtotal_incl" />
+                                </t>
+                            </t>
+                        </t>
+                        <table width="95%" style="text-align: justify; border-color: transparent;">
+                            <colgroup>
+                                <col width="75%" />
+                                <col width="20%" />
+                            </colgroup>
+                            <tr t-if="total_exento > 0 ">
+                                <th style="text-align: right;">Exento:</th>
+                                <th>
+                                    <span t-esc="total_exento" t-options="{'widget': 'monetary', 'display_currency': user.company_id.currency_id}" />
+                                </th>
+                            </tr>
+                            <tr t-if="total_exento > 0 ">
+                                <th style="text-align: right;">Afecto:</th>
+                                <th>
+                                    <span t-esc="total_afecto" t-options="{'widget': 'monetary', 'display_currency': user.company_id.currency_id}" />
+                                </th>
+                            </tr>
+                            <tr >
+                                <th style="text-align: right;">Total:</th>
+                                <th>
+                                    <span t-field="o.amount_total" t-options="{'widget': 'monetary', 'display_currency': user.company_id.currency_id}" />
+                                </th>
+                            </tr>
+                        </table>
+                        <br/>
+                        <div>
+
+                            <t t-set="total_exento" t-value="0"/>
+                            <t t-set="total_afecto" t-value="0"/>
+                            <t t-foreach="o.lines" t-as="l">
+                                <t t-if="o.account_move.journal_id.fel_dte_type != 'FPEQ'">
+
+                                    <t t-if="l.price_subtotal == l.price_subtotal_incl">
+                                        <t t-set="total_exento" t-value="total_exento + l.price_subtotal"/>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-set="total_afecto" t-value="total_afecto + l.price_subtotal_incl"/>
+                                    </t>
+                                    <t t-if="total_exento > 0 ">
+                                        <div style="text-align: right;">
+                                            <span>Exento: </span>
+                                            <span t-esc="total_exento" t-options="{'widget': 'monetary', 'display_currency': user.company_id.currency_id}"/>
+
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <span>Afecto: </span>
+                                            <span t-esc="total_afecto" t-options="{'widget': 'monetary', 'display_currency': user.company_id.currency_id}"/>
+                                        </div>
+                                    </t>
+                                </t>
+                            </t>
+                        </div>
+                        <div>
+                            <t t-if="product_tax">
+                                <b>* Producto sin IVA</b>
+                            </t>
+                        </div>
+                        <div>
+                            <t style="text-align: center;" t-if="o.account_move.fel_uuid">
+                                <center>
+                                    <b>Autorizacion</b>
+                                    <br />
+                                    <t t-esc="o.account_move.fel_uuid" />
+                                </center>
+                                <center>
+                                    <b>Fecha Certificacion</b>
+                                    <br />
+                                    <t t-esc="o.account_move.fel_certification_date" />
+                                </center>
+                                <center>
+                                    <b>Certificador </b>
+                                    <br />
+
+                                    <t t-if="o.company_id.parent_id">
+                                        <t t-esc="o.company_id.parent_id.certifier_name" />
+                                        <span> NIT:</span>
+                                        <t t-esc="o.company_id.parent_id.certifier_vat" />
+                                        <br />
+                                    </t>
+                                    <t t-else="">
+                                        <t t-esc="o.company_id.certifier_name" />
+                                        <span> NIT:</span>
+                                        <t t-esc="o.company_id.certifier_vat" />
+                                        <br />
+                                    </t>
+                                </center>
+                            </t>
+                        </div>
+                        <br />
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
